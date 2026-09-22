@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#080706">
+<title>Свидание в темноте — интерактивный тизер</title>
+<style>
+  :root{
+    --bg:#080706; --panel:#11100e; --text:#f5efe6; --muted:#aaa197;
+    --gold:#e9b66f; --gold2:#f5d39d; --line:#3b3025;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--text);
+    font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow:hidden}
+  body{display:flex;align-items:center;justify-content:center}
+  .app{
+    position:relative;width:100%;height:100%;max-width:900px;overflow:hidden;
+    background:
+      radial-gradient(circle at 72% 15%,rgba(233,182,111,.11),transparent 28%),
+      radial-gradient(circle at 18% 80%,rgba(160,110,55,.08),transparent 30%),
+      linear-gradient(135deg,#080706,#100e0c 52%,#070606);
+  }
+  .glow{position:absolute;width:45vw;height:45vw;max-width:420px;max-height:420px;border-radius:50%;
+    background:rgba(234,177,99,.08);filter:blur(70px);pointer-events:none;transition:transform 1.2s ease}
+  .g1{right:-15%;top:-10%}.g2{left:-20%;bottom:-15%;opacity:.55}
+  .top{position:relative;z-index:2;padding:24px 26px 0}
+  .brand{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#8f8378}
+  .counter{display:flex;justify-content:space-between;align-items:end;margin-top:12px}
+  .number{font-family:Georgia,serif;font-size:19px;color:var(--gold2)}
+  .hint{font-size:11px;color:#716960;letter-spacing:.08em}
+  .progress{height:4px;background:#29231e;border-radius:9px;margin-top:10px;overflow:hidden}
+  .bar{height:100%;width:10%;background:linear-gradient(90deg,var(--gold),var(--gold2));
+    border-radius:9px;transition:width .55s cubic-bezier(.2,.8,.2,1)}
+  .screen{position:absolute;inset:112px 0 0;display:flex;align-items:center;justify-content:center;padding:22px 24px 34px}
+  .card{width:min(760px,100%);max-height:100%;display:flex;flex-direction:column;justify-content:center;
+    animation:enter .55s cubic-bezier(.2,.8,.2,1)}
+  @keyframes enter{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:none}}
+  .eyebrow{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:18px}
+  h1,h2{font-family:Georgia,"Times New Roman",serif;font-weight:400;line-height:1.04;margin:0}
+  h1{font-size:clamp(46px,10vw,86px);letter-spacing:-.04em}
+  h2{font-size:clamp(29px,6vw,54px);max-width:760px}
+  .lead{font-family:Georgia,serif;color:#cfc3b7;font-size:clamp(18px,3.2vw,25px);line-height:1.42;max-width:650px;margin:24px 0 0}
+  .sub{color:var(--muted);font-size:14px;line-height:1.5;max-width:620px;margin:16px 0 0}
+  .choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:28px}
+  .choice,.cta{
+    appearance:none;border:1px solid var(--line);background:rgba(18,16,14,.78);color:var(--text);
+    border-radius:18px;min-height:72px;padding:16px 20px;text-align:left;font-size:17px;
+    cursor:pointer;transition:transform .18s ease,border-color .25s ease,background .25s ease,box-shadow .25s ease;
+    touch-action:manipulation
+  }
+  .choice:hover{border-color:#80613e;background:#17130f;transform:translateY(-2px)}
+  .choice:active{transform:scale(.98)}
+  .choice.selected{border-color:var(--gold);background:rgba(233,182,111,.11);box-shadow:0 0 0 1px rgba(233,182,111,.15),0 10px 40px rgba(0,0,0,.25)}
+  .choice .idx{display:inline-flex;width:27px;height:27px;border:1px solid #5a4938;border-radius:50%;
+    align-items:center;justify-content:center;color:var(--gold2);font-size:12px;margin-right:10px}
+  .bottom{display:flex;justify-content:space-between;align-items:center;margin-top:18px}
+  .back{background:none;border:0;color:#777069;font-size:13px;padding:12px 4px;cursor:pointer}
+  .next,.cta{background:linear-gradient(135deg,#e5ad65,#f5d19b);color:#21170e;border:0;text-align:center;font-weight:700}
+  .next{min-height:54px;padding:14px 24px;border-radius:15px;cursor:pointer;opacity:.35;pointer-events:none;transition:.25s}
+  .next.ready{opacity:1;pointer-events:auto}
+  .interlude{text-align:center;align-items:center}
+  .interlude .mark{width:74px;height:74px;border:1px solid #5a4938;border-radius:50%;display:grid;place-items:center;
+    color:var(--gold);font-family:Georgia,serif;font-size:25px;margin:0 auto 26px;box-shadow:0 0 55px rgba(233,182,111,.08)}
+  .interlude p{font-family:Georgia,serif;font-size:clamp(26px,5vw,42px);line-height:1.18;max-width:620px;margin:0}
+  .interlude small{display:block;color:#857b72;margin-top:18px}
+  .final{text-align:center;align-items:center}
+  .envelope{width:78px;height:58px;border:1px solid #80613e;border-radius:10px;margin:0 auto 24px;position:relative}
+  .envelope:before,.envelope:after{content:"";position:absolute;top:11px;width:43px;height:1px;background:#80613e}
+  .envelope:before{left:1px;transform:rotate(31deg)} .envelope:after{right:1px;transform:rotate(-31deg)}
+  .final h2{max-width:720px}
+  .offer{margin:24px auto 0;padding:18px 22px;border:1px solid #4a3928;border-radius:18px;background:rgba(233,182,111,.06);max-width:580px}
+  .offer b{color:var(--gold2);font-size:24px}
+  .final .cta{margin-top:18px;min-width:min(440px,100%);font-size:16px;min-height:62px;text-align:center}
+  .tiny{font-size:11px;color:#6f675f;margin-top:16px;max-width:520px}
+  .fade{animation:fade .35s ease}@keyframes fade{from{opacity:.2}to{opacity:1}}
+  @media(max-width:640px){
+    .top{padding:18px 18px 0}.screen{inset:92px 0 0;padding:18px 16px 24px}
+    .choices{grid-template-columns:1fr;gap:9px;margin-top:20px}
+    .choice{min-height:62px;padding:13px 15px;font-size:15px;border-radius:15px}
+    .lead{font-size:19px}.sub{font-size:13px}
+    .bottom{margin-top:10px}.back{font-size:12px}.next{min-height:48px}
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="glow g1"></div><div class="glow g2"></div>
+
+  <header class="top" id="top">
+    <div class="brand">Интерактив для двоих · Свидание в темноте</div>
+    <div class="counter"><span class="number" id="counter">01 / 10</span><span class="hint">ваш выбор — только ваш</span></div>
+    <div class="progress"><div class="bar" id="bar"></div></div>
+  </header>
+
+  <main class="screen" id="screen"></main>
+</div>
+
+<script>
+const questions = [
+ {q:"Когда вы идёте на свидание, что для вас важнее всего?",a:["Посмеяться вместе","Поговорить по душам","Получить новые впечатления","Просто побыть вдвоём"]},
+ {q:"Представьте: вы оба оказались в совершенно незнакомом месте. Что будете делать?",a:["Разбираться вместе","Один ведёт, второй доверяет","Сначала попробуем понять, что происходит","Действовать по ощущениям"]},
+ {q:"Если один из вас сомневается, что делает второй?",a:["Поддерживает","Шутит и разряжает обстановку","Берёт инициативу","Даёт время разобраться самому"]},
+ {q:"Что помогает вам почувствовать себя одной командой?",a:["Доверие","Общие решения","Чувство юмора","Умение слышать друг друга"]},
+ {q:"Как вы думаете, насколько хорошо вы знаете друг друга?",a:["Очень хорошо","Почти идеально","Иногда удивляем друг друга","Кажется, нас ещё ждут открытия"]},
+ {q:"Кому из вас проще довериться новому опыту?",a:["Мне","Моей половинке","Примерно одинаково","Зависит от ситуации"]},
+ {q:"А если вам предложат пройти что-то необычное вместе?",a:["Конечно!","Если это безопасно — да","Сначала расскажите, что нас ждёт","Люблю сюрпризы"]},
+ {q:"Что вам интереснее проверить на свидании?",a:["Насколько хорошо мы чувствуем друг друга","Насколько умеем действовать вместе","Насколько можем доверять друг другу","Что нового можем узнать друг о друге"]},
+ {q:"Готовы на время забыть привычный сценарий обычного свидания?",a:["Да, хотим попробовать","Нам уже интересно","Зависит от того, что нас ждёт","Интрига победила"]},
+ {q:"А готовы ли вы узнать друг друга… не так, как обычно?",a:["Да. Нам интересно","Да. Хотим удивиться","Пожалуй, мы готовы","Интрига победила"]},
+];
+
+const moments = [
+ "Интересно… Запоминаем.",
+ "Похоже, у вас уже начинает складываться свой стиль.",
+ "Хороший выбор. Но дальше будет интереснее.",
+ "А теперь представьте, что привычных подсказок становится меньше…",
+ "Вот это уже интересно…",
+ "Запоминаем. Возможно, этот ответ ещё пригодится.",
+ "А если мы не расскажем? 😉",
+ "Кажется, вы начинаете догадываться…",
+ "Остался всего один вопрос.",
+ "Некоторые ответы лучше не объяснять. Их лучше прожить."
+];
+
+let step=0, selected=null, answers=[];
+
+function renderQuestion(){
+  const item=questions[step];
+  document.getElementById('counter').textContent=`${String(step+1).padStart(2,'0')} / 10`;
+  document.getElementById('bar').style.width=`${((step+1)/10)*100}%`;
+  const screen=document.getElementById('screen');
+  screen.innerHTML=`<section class="card fade">
+    <div class="eyebrow">Вопрос ${String(step+1).padStart(2,'0')}</div>
+    <h2>${item.q}</h2>
+    <div class="choices">
+      ${item.a.map((x,i)=>`<button class="choice" data-i="${i}"><span class="idx">${i+1}</span>${x}</button>`).join('')}
+    </div>
+    <div class="bottom">
+      <button class="back" id="back" ${step===0?'style="visibility:hidden"':''}>← Назад</button>
+      <button class="next" id="next">Дальше →</button>
+    </div>
+  </section>`;
+  selected=null;
+  screen.querySelectorAll('.choice').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      screen.querySelectorAll('.choice').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected'); selected=Number(btn.dataset.i);
+      document.getElementById('next').classList.add('ready');
+    });
+  });
+  document.getElementById('next').addEventListener('click',()=>{
+    if(selected===null)return;
+    answers[step]=selected;
+    if(step===9) renderFinal(); else renderInterlude();
+  });
+  const back=document.getElementById('back');
+  back.addEventListener('click',()=>{if(step>0){step--;renderQuestion();}});
+}
+
+function renderInterlude(){
+  document.getElementById('counter').textContent=`${String(step+1).padStart(2,'0')} / 10`;
+  document.getElementById('bar').style.width=`${((step+1)/10)*100}%`;
+  document.getElementById('screen').innerHTML=`<section class="card interlude fade">
+    <div class="mark">✦</div>
+    <p>${moments[step]}</p>
+    <small>Следующий вопрос уже ждёт вас.</small>
+    <button class="next ready" style="margin-top:28px" id="continue">Продолжить →</button>
+  </section>`;
+  document.getElementById('continue').addEventListener('click',()=>{step++;renderQuestion();});
+}
+
+function renderFinal(){
+  document.getElementById('counter').textContent="10 / 10";
+  document.getElementById('bar').style.width="100%";
+  document.getElementById('screen').innerHTML=`<section class="card final fade">
+    <div class="envelope"></div>
+    <div class="eyebrow">Вы прошли 10 / 10</div>
+    <h2>А теперь — самое интересное.</h2>
+    <p class="lead">Мы не будем рассказывать, что именно вас ждёт.</p>
+    <p class="sub">На «Свидании в темноте» привычных подсказок становится меньше, а внимания друг к другу — больше. Некоторые вещи невозможно объяснить заранее. Их лучше почувствовать вместе.</p>
+    <div class="offer">
+      <div>Мы отправим <b>пригласительную открытку</b> вашей половинке.</div>
+      <div style="margin-top:8px">Для вас — <b>−300 ₽</b> на первый визит.</div>
+    </div>
+    <button class="cta" id="admin">ПЕРЕДАЙТЕ ТЕЛЕФОН АДМИНИСТРАТОРУ →</button>
+    <div class="tiny">Администратор продолжит оформление и расскажет только то, что нужно знать перед началом.</div>
+  </section>`;
+  document.getElementById('admin').addEventListener('click',()=>{
+    document.getElementById('screen').innerHTML=`<section class="card final fade">
+      <div class="envelope">✓</div>
+      <div class="eyebrow">Готово</div>
+      <h2>Спасибо! Дальше — за администратором.</h2>
+      <p class="lead">Пусть остальное останется маленькой тайной до вашего свидания.</p>
+      <div class="offer"><b>Свидание в темноте</b><br><span style="color:#aaa">−300 ₽ на первый визит</span></div>
+    </section>`;
+    document.getElementById('top').style.opacity=".45";
+  });
+}
+
+renderQuestion();
+</script>
+</body>
+</html>
